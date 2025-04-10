@@ -1,66 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>QR Code Reader from Image</title>
-    <script src="https://unpkg.com/jsqr/dist/jsQR.js"></script>
-    <style>
-      body {
-        font-family: sans-serif;
-        padding: 20px;
-        text-align: center;
+<head>
+  <meta charset="UTF-8">
+  <title>QR Code Reader with Long Press</title>
+  <script src="https://unpkg.com/jsqr/dist/jsQR.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      text-align: center;
+    }
+    #canvas {
+      display: none;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Reading QR Code from Image</h2>
+
+  <img id="qr-image" src="qr-code.png" alt="Your QR Code" />
+
+  <p id="result"><strong>Decoded Text:</strong> Waiting for scan...</p>
+
+  <canvas id="canvas"></canvas>
+
+  <script>
+    const image = document.getElementById('qr-image');
+    const canvas = document.getElementById('canvas');
+    const context = canvas.getContext('2d');
+    const result = document.getElementById('result');
+
+    // Simulate "long press" (touch and hold)
+    function simulateLongPress(el, delay = 1000) {
+      const touchEvent = new Event('touchstart');
+      el.dispatchEvent(touchEvent);
+      setTimeout(() => {
+        const longPressEvent = new Event('contextmenu');
+        el.dispatchEvent(longPressEvent);
+      }, delay);
+    }
+
+    image.onload = () => {
+      // Draw and decode QR
+      canvas.width = image.naturalWidth;
+      canvas.height = image.naturalHeight;
+      context.drawImage(image, 0, 0);
+
+      const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+      const code = jsQR(imageData.data, canvas.width, canvas.height);
+
+      if (code) {
+        result.innerHTML = `<strong>Decoded Text:</strong> ${code.data}`;
+      } else {
+        result.innerHTML = `<strong>Decoded Text:</strong> Could not read the QR code.`;
       }
-      #canvas {
-        display: none;
-      }
-      img {
-        max-width: 100%;
-        height: auto;
-      }
-    </style>
-  </head>
-  <body>
-    <h2>Reading QR Code from Image</h2>
 
-    <img id="qr-image" src="qr-code.png" alt="Your QR Code" />
+      // 🔥 Simulate long press after a second
+      setTimeout(() => {
+        simulateLongPress(image);
+        console.log("Simulated long press on image");
+      }, 1500);
+    };
 
-    <p id="result"><strong>Decoded Text:</strong> Waiting for scan...</p>
+    image.onerror = () => {
+      result.innerHTML = `<strong>Error:</strong> Unable to load qr-code.png. Make sure the file is in the same folder.`;
+    };
+  </script>
 
-    <canvas id="canvas"></canvas>
-
-    <script>
-      const image = document.getElementById("qr-image");
-      const canvas = document.getElementById("canvas");
-      const context = canvas.getContext("2d");
-      const result = document.getElementById("result");
-
-      image.onload = () => {
-        // Set canvas size to match image
-        canvas.width = image.naturalWidth;
-        canvas.height = image.naturalHeight;
-
-        // Draw image into canvas
-        context.drawImage(image, 0, 0);
-
-        // Get image data and decode with jsQR
-        const imageData = context.getImageData(
-          0,
-          0,
-          canvas.width,
-          canvas.height
-        );
-        const code = jsQR(imageData.data, canvas.width, canvas.height);
-
-        if (code) {
-          result.innerHTML = `<strong>Decoded Text:</strong> ${code.data}`;
-        } else {
-          result.innerHTML = `<strong>Decoded Text:</strong> Could not read the QR code.`;
-        }
-      };
-
-      image.onerror = () => {
-        result.innerHTML = `<strong>Error:</strong> Unable to load qr-code.PNG. Make sure the file is in the same folder.`;
-      };
-    </script>
-  </body>
+</body>
 </html>
