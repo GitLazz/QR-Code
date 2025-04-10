@@ -2,41 +2,47 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Read QR Code from Image</title>
+    <title>QR Code Reader from Image</title>
     <script src="https://unpkg.com/jsqr/dist/jsQR.js"></script>
     <style>
       body {
-        font-family: Arial, sans-serif;
-        text-align: center;
+        font-family: sans-serif;
         padding: 20px;
+        text-align: center;
       }
-      canvas {
+      #canvas {
         display: none;
+      }
+      img {
+        max-width: 100%;
+        height: auto;
       }
     </style>
   </head>
   <body>
-    <h1>Decode QR Code from Image</h1>
+    <h2>Reading QR Code from Image</h2>
 
-    <!-- QR Code Image -->
-    <img id="qr-image" src="qr-code.png"qr-image" src="qr-code.png" alt="QR
-    Code"> " alt="QR Code" crossorigin="anonymous">
+    <img id="qr-image" src="qr-code.PNG" alt="Your QR Code" />
 
-    <p id="result"><strong>Decoded Text:</strong> Loading...</p>
+    <p id="result"><strong>Decoded Text:</strong> Waiting for scan...</p>
 
-    <!-- Hidden Canvas -->
     <canvas id="canvas"></canvas>
 
     <script>
       const image = document.getElementById("qr-image");
       const canvas = document.getElementById("canvas");
       const context = canvas.getContext("2d");
+      const result = document.getElementById("result");
 
       image.onload = () => {
-        canvas.width = image.width;
-        canvas.height = image.height;
-        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        // Set canvas size to match image
+        canvas.width = image.naturalWidth;
+        canvas.height = image.naturalHeight;
 
+        // Draw image into canvas
+        context.drawImage(image, 0, 0);
+
+        // Get image data and decode with jsQR
         const imageData = context.getImageData(
           0,
           0,
@@ -46,14 +52,14 @@
         const code = jsQR(imageData.data, canvas.width, canvas.height);
 
         if (code) {
-          document.getElementById(
-            "result"
-          ).innerHTML = `<strong>Decoded Text:</strong> ${code.data}`;
+          result.innerHTML = `<strong>Decoded Text:</strong> ${code.data}`;
         } else {
-          document.getElementById(
-            "result"
-          ).innerHTML = `<strong>Decoded Text:</strong> Could not read QR code.`;
+          result.innerHTML = `<strong>Decoded Text:</strong> Could not read the QR code.`;
         }
+      };
+
+      image.onerror = () => {
+        result.innerHTML = `<strong>Error:</strong> Unable to load qr-code.PNG. Make sure the file is in the same folder.`;
       };
     </script>
   </body>
