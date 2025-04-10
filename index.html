@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Read QR Code from Image</title>
+  <script src="https://unpkg.com/jsqr/dist/jsQR.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    canvas {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Decode QR Code from Image</h1>
+
+  <!-- QR Code Image -->
+  <img id="qr-image" src="https://api.qrserver.com/v1/create-qr-code/?data=Hello%20from%20QR%20code!" alt="QR Code" crossorigin="anonymous">
+
+  <p id="result"><strong>Decoded Text:</strong> Loading...</p>
+
+  <!-- Hidden Canvas -->
+  <canvas id="canvas"></canvas>
+
+  <script>
+    const image = document.getElementById('qr-image');
+    const canvas = document.getElementById('canvas');
+    const context = canvas.getContext('2d');
+
+    image.onload = () => {
+      canvas.width = image.width;
+      canvas.height = image.height;
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+      const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+      const code = jsQR(imageData.data, canvas.width, canvas.height);
+
+      if (code) {
+        document.getElementById('result').innerHTML = `<strong>Decoded Text:</strong> ${code.data}`;
+      } else {
+        document.getElementById('result').innerHTML = `<strong>Decoded Text:</strong> Could not read QR code.`;
+      }
+    };
+  </script>
+
+</body>
+</html>
